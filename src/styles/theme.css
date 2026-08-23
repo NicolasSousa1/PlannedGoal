@@ -3,7 +3,7 @@
   [data-theme='light'] {
     --background: #f8fafc;
     --foreground: #0f1729;
-    --primary: #925cf0;
+    --primary: #FF4F00;
     --primary-foreground: #f8fafc;
     --card: #fcfcfe;
     --border: rgba(9, 9, 11, 0.08);
@@ -18,8 +18,8 @@
   [data-theme='dark'] {
     --background: #0f0d16;
     --foreground: #fcfcfe;
-    --primary: #925cf0;
-    --primary-foreground: #fcfcfc;
+    --primary: #FF4F00;
+    --primary-foreground: #f8fafc;
     --card: #181622;
     --border: rgba(248, 250, 252, 0.4);
     --muted-primary: rgba(146, 92, 240, 0.2);
