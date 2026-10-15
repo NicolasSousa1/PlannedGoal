@@ -23,6 +23,14 @@ Com base nessas informações, a aplicação utiliza a **API do Gemini** para ge
 * API do Google Gemini
 * Inteligência Artificial
 
+## Configuração da API do Gemini na Vercel
+
+A chave do Gemini deve ser configurada na Vercel como variável de ambiente `GEMINI_API_KEY` para os ambientes necessários (Production, Preview e/ou Development). Não use o prefixo `VITE_`: variáveis com esse prefixo são incorporadas ao código do navegador.
+
+O endpoint serverless `api/insight.ts` chama o Gemini no servidor. O front-end envia o prompt para `/api/insight` e não recebe nem envia a chave. Após configurar a variável, faça um novo deploy para aplicar a alteração.
+
+Para testar localmente a função `/api/insight`, use `vercel dev` na raiz do projeto (depois de vincular a pasta ao projeto Vercel e disponibilizar a variável `GEMINI_API_KEY` no ambiente Development). `npm run dev` inicia apenas o Vite e não executa funções serverless, então `/api/insight` retorna 404 nesse modo.
+
 ## Sobre o projeto
 
 O projeto foi desenvolvido durante o curso **Santander 2026 - AI React Front-end**, utilizando como base a estrutura apresentada ao longo do curso.

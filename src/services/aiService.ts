@@ -28,17 +28,11 @@ export interface InsightData {
   }
 }
 
-const API_KEY = String(import.meta.env.VITE_GEMINI_API_KEY)
-const MODEL_NAME = 'gemini-flash-latest'
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`
-
 const callGeminiAPI = async (prompt: string) => {
-  const response = await fetch(GEMINI_API_URL, {
+  const response = await fetch('/api/insight', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-    }),
+    body: JSON.stringify({ prompt }),
   })
 
   if (!response.ok) {
