@@ -11,6 +11,10 @@ interface VercelResponse {
 }
 
 const MODEL_NAME = 'gemini-flash-latest'
+const MAX_ATTEMPTS = 3
+
+const wait = (milliseconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -29,27 +33,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey,
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
         },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      },
-    )
+      )
 
-    if (!response.ok) {
-      console.error('Gemini retornou status:', response.status)
-      return res.status(502).json({ error: 'Não foi possível gerar o diagnóstico.' })
+      if (response.ok) {
+        const data = await response.json()
+        return res.status(200).json(data)
+      }
+
+      const errorDetails = await response.text()
+      if (response.status === 503 && attempt < MAX_ATTEMPTS) {
+        const delay = 1_000 * 2 ** (attempt - 1) + Math.random() * 500
+        console.warn(`Gemini retornou 503; nova tentativa em ${Math.round(delay)}ms.`)
+        await wait(delay)
+        continue
+      }
+
+      console.error('Gemini retornou erro:', response.status, errorDetails)
+      return res
+        .status(response.status === 503 ? 503 : 502)
+        .json({ error: 'Não foi possível gerar o diagnóstico.' })
     }
 
-    const data = await response.json()
-    return res.status(200).json(data)
+    return res.status(503).json({ error: 'Gemini está temporariamente indisponível.' })
   } catch (error) {
     console.error('Falha ao chamar Gemini:', error)
     return res.status(502).json({ error: 'Não foi possível gerar o diagnóstico.' })
